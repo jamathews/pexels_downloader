@@ -20,19 +20,23 @@ function write_downloaded_file(localPath, res) {
 }
 
 function download(file_url, localPath) {
-    https.get(file_url, (res) => {
-        // Detect a redirect
-        if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
-            let redirect = new url.URL(res.headers.location)
-            if (redirect.hostname) {
-                download(res.headers.location, localPath)
+    if (fs.existsSync(localPath)) {
+        console.log(localPath + " exists, not overwriting it.")
+    } else {
+        https.get(file_url, (res) => {
+            // Detect a redirect
+            if (res.statusCode > 300 && res.statusCode < 400 && res.headers.location) {
+                let redirect = new url.URL(res.headers.location)
+                if (redirect.hostname) {
+                    download(res.headers.location, localPath)
+                } else {
+                    console.log(res)
+                }
             } else {
-                console.log(res)
+                write_downloaded_file(localPath, res);
             }
-        } else {
-            write_downloaded_file(localPath, res);
-        }
-    })
+        })
+    }
 }
 
 function save_to_disk(file_url, folder, localPath) {
