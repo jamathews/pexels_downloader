@@ -14,9 +14,9 @@ function write_downloaded_file(localPath, res) {
     res.pipe(filePath);
     filePath.on('finish', () => {
         filePath.close();
-        console.log('Downloaded: ' + localPath + " " + filePath.bytesWritten.toString() + " bytes");
+        saved += 1
+        console.log('Downloaded (' + saved.toString() + '): ' + localPath + " " + filePath.bytesWritten.toString() + " bytes");
     })
-    saved += 1
 }
 
 function download(file_url, localPath) {
@@ -70,7 +70,6 @@ function save_videos(media) {
 function save_page(target_collection, page_num) {
     client.collections.media({id: target_collection['id'], page: page_num, per_page: PER_PAGE}).then(media => {
         save_videos(media);
-        console.log("Saved: " + saved.toString())
     })
 }
 
@@ -80,13 +79,21 @@ function save_collection(target_collection) {
     }
 }
 
-client.collections.all({per_page: 1}).then(collections => {
-    console.log(collections.error)
-    let target_collection = collections.collections.find(o => o.title === COLLECTION_NAME)
-    save_collection(target_collection);
-})
+function main() {
+    client.collections.all({per_page: 1}).then(collections => {
+        if (collections.error) {
+            console.log(collections.error)
+        }
+        let target_collection = collections.collections.find(o => o.title === COLLECTION_NAME)
+        save_collection(target_collection);
+    })
+}
 
-// URL = "https://player.vimeo.com/external/464155294.hd.mp4?s=029f020296b2170c5ec708aed35fbad44afe6080&profile_id=172&oauth2_token_id=57447761"
-// FOLDER = "output/Anastasia  Shuraeva/a-happy-family-dancing-with-their-white-dog-5500750"
-// FILE = "output/Anastasia  Shuraeva/a-happy-family-dancing-with-their-white-dog-5500750/1439184.mp4"
-// save_to_disk(URL, FOLDER, FILE)
+function main_bypass_api() {
+    URL = "https://player.vimeo.com/external/464155294.hd.mp4?s=029f020296b2170c5ec708aed35fbad44afe6080&profile_id=172&oauth2_token_id=57447761"
+    FOLDER = "output/Anastasia  Shuraeva/a-happy-family-dancing-with-their-white-dog-5500750"
+    FILE = "output/Anastasia  Shuraeva/a-happy-family-dancing-with-their-white-dog-5500750/1439184.mp4"
+    save_to_disk(URL, FOLDER, FILE)
+}
+
+main();
