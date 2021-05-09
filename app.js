@@ -16,6 +16,7 @@ function write_downloaded_file(localPath, res) {
         filePath.close();
         console.log('Downloaded: ' + localPath + " " + filePath.bytesWritten.toString() + " bytes");
     })
+    saved += 1
 }
 
 function download(file_url, localPath) {
@@ -54,7 +55,6 @@ function save_video(item) {
     }
     let filename = path.join(folder, largest_video_file.id.toString() + extension)
     save_to_disk(largest_video_file.link, folder, filename)
-    saved += 1
 }
 
 function save_videos(media) {
