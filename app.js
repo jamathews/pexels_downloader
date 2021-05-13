@@ -49,16 +49,24 @@ function save_to_disk(file_url, folder, localPath) {
 }
 
 function save_video(item) {
-    let user_name = item.user.name
-    let title = item.url.split("/")[4]
-    let largest_video_file = item.video_files.sort((a, b) => parseInt(b.width) - parseInt(a.width))[0]
-    let folder = path.join(OUTPUT_ROOT, user_name, title)
-    let extension = ".unknown"
-    if (largest_video_file.file_type === "video/mp4") {
-        extension = ".mp4"
+    let user_name = "unknown_user"
+    if (item.user && item.user.name) {
+        user_name = item.user.name
+    } else if (item.username) {
+        user_name = item.username
     }
-    let filename = path.join(folder, largest_video_file.id.toString() + extension)
-    save_to_disk(largest_video_file.link, folder, filename)
+    let title = item.url.split("/")[4]
+    if (item && item.video_files) {
+        let largest_video_file = item.video_files.sort((a, b) => parseInt(b.width) - parseInt(a.width))[0]
+        let extension = ".unknown"
+        if (largest_video_file.file_type === "video/mp4") {
+            extension = ".mp4"
+        }
+        let filename = path.join(OUTPUT_ROOT, user_name + "__" + title + "__" + largest_video_file.id.toString() + extension)
+        save_to_disk(largest_video_file.link, OUTPUT_ROOT, filename)
+    } else {
+        console.log("Item has no video files\n" + item.url)
+    }
 }
 
 function save_videos(media) {
@@ -74,7 +82,11 @@ function save_page(target_collection, page_num) {
 }
 
 function save_collection(target_collection) {
-    for (let page_num = 1; page_num <= Math.ceil(target_collection.videos_count / PER_PAGE); page_num++) {
+    console.log("Collection contains " + target_collection.videos_count.toString() + " videos.")
+    let first_page = 30
+    let last_page = Math.ceil(target_collection.videos_count / PER_PAGE) + 10
+    for (let page_num = first_page; page_num <= last_page; page_num++) {
+        console.log("Saving page " + page_num.toString() + "/" + last_page.toString())
         save_page(target_collection, page_num);
     }
 }
@@ -83,17 +95,24 @@ function main() {
     client.collections.all({per_page: 1}).then(collections => {
         if (collections.error) {
             console.log(collections.error)
+        } else if (collections.collections) {
+            let target_collection = collections.collections.find(o => o.title === COLLECTION_NAME)
+            if (target_collection) {
+                save_collection(target_collection);
+            } else {
+                console.log("Can't find collection " + COLLECTION_NAME)
+            }
+        } else {
+            console.log("No collections")
         }
-        let target_collection = collections.collections.find(o => o.title === COLLECTION_NAME)
-        save_collection(target_collection);
     })
 }
 
 function main_bypass_api() {
     URL = "https://player.vimeo.com/external/464155294.hd.mp4?s=029f020296b2170c5ec708aed35fbad44afe6080&profile_id=172&oauth2_token_id=57447761"
-    FOLDER = "output/Anastasia  Shuraeva/a-happy-family-dancing-with-their-white-dog-5500750"
-    FILE = "output/Anastasia  Shuraeva/a-happy-family-dancing-with-their-white-dog-5500750/1439184.mp4"
-    save_to_disk(URL, FOLDER, FILE)
+    FILE = os.path.join(OUTPUT_ROOT, "Anastasia  Shuraeva__a-happy-family-dancing-with-their-white-dog-5500750__1439184.mp4")
+    save_to_disk(URL, OUTPUT_ROOT, FILE)
 }
 
 main();
+// main_bypass_api();
