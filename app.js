@@ -4,8 +4,8 @@ const path = require('path');
 const url = require('url');
 const https = require('https');
 const client = pexels.createClient(process.env.API_KEY)
-const COLLECTION_NAME = 'I\'m Moving But I\'m Not Going Anywhere'
-const PER_PAGE = 80
+const COLLECTION_NAME = 'UnderPenaltyOfDeath'
+const PER_PAGE = 25
 const OUTPUT_ROOT = "./output"
 let saved = 0;
 
@@ -83,7 +83,7 @@ function save_page(target_collection, page_num) {
 
 function save_collection(target_collection) {
     console.log("Collection contains " + target_collection.videos_count.toString() + " videos.")
-    let first_page = 30
+    let first_page = 1
     let last_page = Math.ceil(target_collection.videos_count / PER_PAGE) + 10
     for (let page_num = first_page; page_num <= last_page; page_num++) {
         console.log("Saving page " + page_num.toString() + "/" + last_page.toString())
